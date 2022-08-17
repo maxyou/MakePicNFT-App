@@ -13,15 +13,15 @@ declare global {
     ethereum: MetaMaskInpageProvider;
   }
   
-  type ExternalProvider = {
-    isMetaMask?: boolean;
-    isStatus?: boolean;
-    host?: string;
-    path?: string;
-    sendAsync?: (request: { method: string, params?: Array<any> }, callback: (error: any, response: any) => void) => void
-    send?: (request: { method: string, params?: Array<any> }, callback: (error: any, response: any) => void) => void
-    request?: (request: { method: string, params?: Array<any> }) => Promise<any>
-  }
+  // type ExternalProvider = {
+  //   isMetaMask?: boolean;
+  //   isStatus?: boolean;
+  //   host?: string;
+  //   path?: string;
+  //   sendAsync?: (request: { method: string, params?: Array<any> }, callback: (error: any, response: any) => void) => void
+  //   send?: (request: { method: string, params?: Array<any> }, callback: (error: any, response: any) => void) => void
+  //   request?: (request: { method: string, params?: Array<any> }) => Promise<any>
+  // }
 }
 
 
@@ -203,7 +203,7 @@ const Home: NextPage = () => {
 
     // Render Methods
     const renderNotConnectedContainer = () => (
-      <button onClick={connectWallet} className="cta-button connect-wallet-button">
+      <button onClick={connectWallet} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
         Connect to Wallet
       </button>
     );
@@ -229,18 +229,18 @@ const Home: NextPage = () => {
   * Added a conditional render! We don't want to show Connect to Wallet if we're already connected :).
   */
   return (
-    <div className="App">
-      <div className="container">
-
-        <div className="header-container">
-          <p className="header gradient-text">My NFT Collection</p>
-          <p className="sub-text">
-            Input Your brand below to mint NFT in {(1 + tokenId).toString()} of {maxNum.toString()}!
-          </p>
+    <div className="bg-sky-500 w-screen h-screen grid gap-2 place-content-center place-items-center">
+      <div className='bg-purple max-w-md rounded overflow-hidden shadow-lg p-4'>
+        <div className="w-full h-full grid gap-2 place-content-center place-items-center">
+        
+          <div className="bg-green-200 p-2 text-4xl">Mint your NFT!</div>
+          <div className="bg-green-200 p-2 text-3xl">
+            Input Your greet here and mint it to NFT in {(1 + tokenId).toString()} of {maxNum.toString()}!
+          </div>
           {currentAccount === "" ? (
             renderNotConnectedContainer()
           ) : (
-              <div>
+              <div className="bg-green-200">
                 <input type="text" name="text" onChange={e => setMyBrand(e.target.value)} value={myBrand} /><br /><br />
                 {
                   isMintting ?
@@ -254,11 +254,9 @@ const Home: NextPage = () => {
               </div>
             )}
         </div>
-
       </div>
     </div>
   );
-
   
 }
 
