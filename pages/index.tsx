@@ -8,11 +8,11 @@ import { ethers } from "ethers";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 
 declare global {
-  
+
   interface Window {
     ethereum: MetaMaskInpageProvider;
   }
-  
+
   // type ExternalProvider = {
   //   isMetaMask?: boolean;
   //   isStatus?: boolean;
@@ -113,7 +113,7 @@ const Home: NextPage = () => {
       if (ethereum) {
         // Same stuff again
         // const provider = new ethers.providers.Web3Provider(ethereum as unknown as ExternalProvider);
-        const provider = new ethers.providers.Web3Provider(ethereum as unknown as  ethers.providers.ExternalProvider);
+        const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
 
@@ -145,7 +145,7 @@ const Home: NextPage = () => {
       const { ethereum } = window;
 
       if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum as unknown as  ethers.providers.ExternalProvider);
+        const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, provider);
 
         console.log("try to get token id and max num...")
@@ -177,7 +177,7 @@ const Home: NextPage = () => {
       const { ethereum } = window;
 
       if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum as unknown as  ethers.providers.ExternalProvider);
+        const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const signer = provider.getSigner();
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
 
@@ -201,12 +201,12 @@ const Home: NextPage = () => {
     }
   }
 
-    // Render Methods
-    const renderNotConnectedContainer = () => (
-      <button onClick={connectWallet} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        Connect to Wallet
-      </button>
-    );
+  // Render Methods
+  const renderNotConnectedContainer = () => (
+    <button onClick={connectWallet} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      Connect to Wallet
+    </button>
+  );
 
 
   useEffect(() => {
@@ -229,35 +229,48 @@ const Home: NextPage = () => {
   * Added a conditional render! We don't want to show Connect to Wallet if we're already connected :).
   */
   return (
-    <div className="bg-sky-500 w-screen h-screen grid gap-2 place-content-center place-items-center">
-      <div className='bg-purple max-w-md rounded overflow-hidden shadow-lg p-4'>
-        <div className="w-full h-full grid gap-2 place-content-center place-items-center">
-        
-          <div className="bg-green-200 p-2 text-4xl">Mint your NFT!</div>
-          <div className="bg-green-200 p-2 text-3xl">
-            Input Your greet here and mint it to NFT in {(1 + tokenId).toString()} of {maxNum.toString()}!
+    <>
+      <Head>
+        <title>mint your best wish</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <div className='bg-gray-100 w-screen h-screen flex flex-col justify-center items-center gap-2'>
+
+        <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-2'>
+
+          <div className="p-2 text-4xl">Mint your NFT!</div>
+
+          <div className="p-2 text-2xl">
+            Give your greet here and mint it to NFT in {(1 + tokenId).toString()} of {maxNum.toString()}!
           </div>
+
           {currentAccount === "" ? (
             renderNotConnectedContainer()
           ) : (
-              <div className="bg-green-200">
-                <input type="text" name="text" onChange={e => setMyBrand(e.target.value)} value={myBrand} /><br /><br />
-                {
-                  isMintting ?
-                    (<button className="cta-button connect-wallet-button">Please wait Mintting... </button>) :
-                    (<button onClick={askContractToMintNft} className="cta-button connect-wallet-button">Mint NFT</button>)
-                }
-                <br />{
-                  justMintNft.length == 0 ? null :
-                    <p className="sub-text"> <a href={justMintNft}>  Click to view last NFT you mint  </a>  </p>
-                }
+            <div className="p-2 flex flex-col justify-center items-center gap-3">
+              <div>
+                <input className="shadow appearance-none border rounded min-w-[25rem] p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-600"
+                  type="text" name="text" onChange={e => setMyBrand(e.target.value)} value={myBrand} placeholder="leave your wishes here!" />
               </div>
-            )}
+              {
+                isMintting ?
+                  (<button className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Please wait Mintting... </button>) :
+                  (<button onClick={askContractToMintNft} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Mint NFT</button>)
+              }
+              {
+                justMintNft.length == 0 ? null :
+                  <p className="sub-text"> <a href={justMintNft}>  Click to view last NFT you mint  </a>  </p>
+              }
+            </div>
+          )}
+
         </div>
       </div>
-    </div>
+
+    </>
   );
-  
+
 }
 
 export default Home
