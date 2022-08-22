@@ -242,7 +242,7 @@ const Home: NextPage = () => {
           <div className="p-2 text-4xl">Mint your NFT!</div>
 
           <div className="p-2 text-2xl">
-            Give your greet here and mint it to NFT in {(1 + tokenId).toString()} of {maxNum.toString()}!
+            Give your greet here and mint it to NFT in {1 + parseInt(tokenId.toString())} of {maxNum.toString()}!
           </div>
 
           {currentAccount === "" ? (
