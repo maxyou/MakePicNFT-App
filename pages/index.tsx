@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import React, { useEffect, useState } from "react";
-import myEpicNft from '../utils/MyEpicNFT.json';
+import myBlessNft from '../utils/MyBlessNFT.json';
 import { ethers } from "ethers";
 
 import { MetaMaskInpageProvider } from "@metamask/providers";
@@ -24,24 +24,15 @@ declare global {
   // }
 }
 
-
-const TWITTER_HANDLE = '_buildspace';
-const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const OPENSEA_LINK = '';
-const TOTAL_MINT_COUNT = 50;
-const CONTRACT_ADDRESS = "0x4280403668a7749C1012D3AB105C373bAE8cfEbD";
-
+const CONTRACT_ADDRESS = "0xEe4E584477421b724CbC120cb3897034C4A374d2";
 
 
 const Home: NextPage = () => {
 
   const [currentAccount, setCurrentAccount] = useState("");
-  const [myBrand, setMyBrand] = useState("");
-  const [tokenId, setTokenId] = useState(0);
-  const [maxNum, setMaxNum] = useState(0);
+  const [myBless, setMyBless] = useState("");
   const [isMintting, setIsMintting] = useState(false);
   const [justMintNft, setJustMintNft] = useState("");
-  //const [count, setCount] = useState(0);
 
 
   const checkIfWalletIsConnected = async () => {
@@ -115,17 +106,17 @@ const Home: NextPage = () => {
         // const provider = new ethers.providers.Web3Provider(ethereum as unknown as ExternalProvider);
         const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myBlessNft.abi, signer);
 
         // THIS IS THE MAGIC SAUCE.
         // This will essentially "capture" our event when our contract throws it.
         // If you're familiar with webhooks, it's very similar to that!        
-        connectedContract.on("NFTMintInfo", (from, tokenId, brand, mark) => {
-          console.log(from, tokenId.toNumber(), brand, mark)
+        connectedContract.on("NFTMintInfo", (from, tokenId, bless) => {
+          console.log(from, tokenId.toNumber(), bless)
           //console.log("EventListener will send alert here.");          
           //alert(`New NFT: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
           //alert(`https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`)
-          setJustMintNft(`https://rinkeby.rarible.com/collection/${CONTRACT_ADDRESS}/items`)
+          setJustMintNft(`https://goerli.rarible.com/collection/${CONTRACT_ADDRESS}/items`)
         });
 
         console.log("Setup event listener!")
@@ -139,36 +130,11 @@ const Home: NextPage = () => {
   }
 
 
-  const getContractTokenId = async () => {
-
-    try {
-      const { ethereum } = window;
-
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, provider);
-
-        console.log("try to get token id and max num...")
-        let result = await connectedContract.getTokenId();
-
-        setTokenId(result[0])
-        setMaxNum(result[1])
-
-        console.log(`Current token id is ${result[0]}, and max num is ${result[1]}`);
-
-      } else {
-        console.log("Ethereum object doesn't exist!");
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
 
   const askContractToMintNft = async () => {
 
 
-    if (!myBrand || myBrand.length == 0) {
+    if (!myBless || myBless.length == 0) {
       alert("please input you brand")
       return;
     }
@@ -179,17 +145,17 @@ const Home: NextPage = () => {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myBlessNft.abi, signer);
 
         setIsMintting(true)
 
         console.log("Going to pop wallet now to pay gas...")
-        let nftTxn = await connectedContract.makeAnEpicNFT(myBrand);
+        let nftTxn = await connectedContract.makeBlessNFT(myBless);
 
         console.log("Mining...please wait.")
         await nftTxn.wait();
 
-        setMyBrand("")
+        setMyBless("")
         setIsMintting(false)
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
 
@@ -210,17 +176,6 @@ const Home: NextPage = () => {
 
 
   useEffect(() => {
-    //console.log(`setInterval in useEffect - ${count}`);
-    getContractTokenId()
-
-    setInterval(() => {
-      //console.log(`setInterval with count - ${count}`);
-      //setCount(old => old + 1);      
-      getContractTokenId()
-    }, 5000);
-  }, []);
-
-  useEffect(() => {
     checkIfWalletIsConnected();
   }, [])
 
@@ -237,21 +192,21 @@ const Home: NextPage = () => {
 
       <div className='bg-gray-100 w-screen h-screen flex flex-col justify-center items-center gap-2'>
 
-        <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-2'>
+        <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
 
           <div className="p-2 text-4xl">Mint your NFT!</div>
 
           <div className="p-2 text-2xl">
-            Give your greet here and mint it to NFT in {1 + parseInt(tokenId.toString())} of {maxNum.toString()}!
+            Give your Bless here and mint it to NFT!
           </div>
 
           {currentAccount === "" ? (
             renderNotConnectedContainer()
           ) : (
-            <div className="p-2 flex flex-col justify-center items-center gap-3">
+            <div className="p-2 flex flex-col justify-center items-center gap-5">
               <div>
                 <input className="shadow appearance-none border rounded min-w-[25rem] p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-600"
-                  type="text" name="text" onChange={e => setMyBrand(e.target.value)} value={myBrand} placeholder="leave your wishes here!" />
+                  type="text" name="text" onChange={e => setMyBless(e.target.value)} value={myBless} placeholder="leave your wishes here!" />
               </div>
               {
                 isMintting ?
@@ -260,7 +215,12 @@ const Home: NextPage = () => {
               }
               {
                 justMintNft.length == 0 ? null :
-                  <p className="sub-text"> <a href={justMintNft}>  Click to view last NFT you mint  </a>  </p>
+                <div className='w-full h-auto p-2 border rounded'>
+                  <div>
+                  Click to view last NFT you mint:
+                  </div>
+                  <a className='break-all underline decoration-transparent hover:decoration-inherit' href={justMintNft}> {justMintNft} </a>
+                </div>
               }
             </div>
           )}
