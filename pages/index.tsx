@@ -24,7 +24,7 @@ declare global {
   // }
 }
 
-const CONTRACT_ADDRESS = "0xEe4E584477421b724CbC120cb3897034C4A374d2";
+const CONTRACT_ADDRESS = "0x2c9b324c33D555B8aB23CEAB5571C7Ec5E4130d8";
 
 
 const Home: NextPage = () => {
@@ -116,7 +116,7 @@ const Home: NextPage = () => {
           //console.log("EventListener will send alert here.");          
           //alert(`New NFT: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
           //alert(`https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`)
-          setJustMintNft(`https://goerli.rarible.com/collection/${CONTRACT_ADDRESS}/items`)
+          setJustMintNft(`https://goerli.pixxiti.com/address/0xCa57e178c9414FDF541beaf6097D85D9716A5359`)
         });
 
         console.log("Setup event listener!")
@@ -150,7 +150,7 @@ const Home: NextPage = () => {
         setIsMintting(true)
 
         console.log("Going to pop wallet now to pay gas...")
-        let nftTxn = await connectedContract.makeBlessNFT(myBless);
+        let nftTxn = await connectedContract.makeBlessNFT("");
 
         console.log("Mining...please wait.")
         await nftTxn.wait();
