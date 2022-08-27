@@ -24,7 +24,7 @@ declare global {
   // }
 }
 
-const CONTRACT_ADDRESS = "0x2c9b324c33D555B8aB23CEAB5571C7Ec5E4130d8";
+const CONTRACT_ADDRESS = "0x8E542a41088cfDBFdCF21B796413d7d8f363f65E";
 
 
 const Home: NextPage = () => {
@@ -116,7 +116,10 @@ const Home: NextPage = () => {
           //console.log("EventListener will send alert here.");          
           //alert(`New NFT: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
           //alert(`https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`)
-          setJustMintNft(`https://goerli.pixxiti.com/address/0xCa57e178c9414FDF541beaf6097D85D9716A5359`)
+          const viewAddr = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
+          console.log("EventListener - view address" + viewAddr);          
+          // const viewAddr = `https://goerli.pixxiti.com/address/0xCa57e178c9414FDF541beaf6097D85D9716A5359`
+          setJustMintNft(viewAddr)
         });
 
         console.log("Setup event listener!")
