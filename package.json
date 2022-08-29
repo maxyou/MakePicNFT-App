@@ -8,6 +8,7 @@
   "dependencies": {
     "@metamask/providers": "^9.1.0",
     "ethers": "^5.6.9",
+    "ipfs-core": "^0.15.4",
     "next": "latest",
     "react": "18.1.0",
     "react-dom": "18.1.0"

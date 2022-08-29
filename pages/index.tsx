@@ -4,7 +4,7 @@ import Image from 'next/image'
 import React, { useEffect, useState } from "react";
 import myBlessNft from '../utils/MyBlessNFT.json';
 import { ethers } from "ethers";
-
+import * as IPFS from 'ipfs-core'
 import { MetaMaskInpageProvider } from "@metamask/providers";
 
 declare global {
@@ -33,7 +33,8 @@ const Home: NextPage = () => {
   const [myBless, setMyBless] = useState("");
   const [isMintting, setIsMintting] = useState(false);
   const [justMintNft, setJustMintNft] = useState("");
-
+  const [image, setImage] = useState(null);
+  const [createObjectURL, setCreateObjectURL] = useState<any>(null);
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -132,10 +133,37 @@ const Home: NextPage = () => {
     }
   }
 
+  const uploadFile = (event:any) => {
+    if (event.target.files && event.target.files[0]) {
+      const i = event.target.files[0];
 
+      setImage(i);
+      const imgUrl = URL.createObjectURL(i)
+      console.log("selected a image, object url:"+imgUrl)
+      setCreateObjectURL(imgUrl);
+    }
+  };
+
+  const sendToIpfs = async () => {
+
+    if(image!=null){
+      const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
+      const { cid } = await ipfs.add(image)
+      console.log("ipfs create and add string, cid:"+cid)
+    }
+
+  }
 
   const askContractToMintNft = async () => {
 
+
+    // const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
+    // const { cid } = await ipfs.add(myBless)
+    // console.log("ipfs create and add string, cid:"+cid)
+
+    // if(true){
+    //   return;
+    // }
 
     if (!myBless || myBless.length == 0) {
       alert("please input you brand")
@@ -196,11 +224,21 @@ const Home: NextPage = () => {
       <div className='bg-gray-100 w-screen h-screen flex flex-col justify-center items-center gap-2'>
 
         <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
+        
+        <img src={createObjectURL} />
+        <input type="file" name="myImage" onChange={uploadFile} />
+        <button
+          className="btn btn-primary"
+          type="submit"
+          onClick={sendToIpfs}
+        >
+          Send to server
+        </button>
 
           <div className="p-2 text-4xl">Mint your NFT!</div>
 
           <div className="p-2 text-2xl">
-            Give your Bless here and mint it to NFT!
+            Give your Bless ipfs here:
           </div>
 
           {currentAccount === "" ? (
@@ -209,7 +247,7 @@ const Home: NextPage = () => {
             <div className="p-2 flex flex-col justify-center items-center gap-5">
               <div>
                 <input className="shadow appearance-none border rounded min-w-[25rem] p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-600"
-                  type="text" name="text" onChange={e => setMyBless(e.target.value)} value={myBless} placeholder="leave your wishes here!" />
+                  type="text" name="text" onChange={e => setMyBless(e.target.value)} value={myBless} placeholder="ipfs://..." />
               </div>
               {
                 isMintting ?
