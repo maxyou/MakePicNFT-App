@@ -35,6 +35,7 @@ const Home: NextPage = () => {
   const [justMintNft, setJustMintNft] = useState("");
   const [image, setImage] = useState(null);
   const [createObjectURL, setCreateObjectURL] = useState<any>(null);
+  const [ipfsCid, setIpfsCid] = useState("");
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -149,6 +150,7 @@ const Home: NextPage = () => {
     if(image!=null){
       const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
       const { cid } = await ipfs.add(image)
+      setIpfsCid("ipfs://"+cid)
       console.log("ipfs create and add string, cid:"+cid)
     }
 
@@ -165,10 +167,10 @@ const Home: NextPage = () => {
     //   return;
     // }
 
-    if (!myBless || myBless.length == 0) {
-      alert("please input you brand")
-      return;
-    }
+    // if (!myBless || myBless.length == 0) {
+    //   alert("please input you brand")
+    //   return;
+    // }
 
     try {
       const { ethereum } = window;
@@ -181,7 +183,7 @@ const Home: NextPage = () => {
         setIsMintting(true)
 
         console.log("Going to pop wallet now to pay gas...")
-        let nftTxn = await connectedContract.makeBlessNFT("");
+        let nftTxn = await connectedContract.makeBlessNFT(ipfsCid);
 
         console.log("Mining...please wait.")
         await nftTxn.wait();
@@ -225,20 +227,22 @@ const Home: NextPage = () => {
 
         <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
         
-        <img src={createObjectURL} />
         <input type="file" name="myImage" onChange={uploadFile} />
+        <img src={createObjectURL} />
         <button
           className="btn btn-primary"
           type="submit"
           onClick={sendToIpfs}
-        >
-          Send to server
-        </button>
+        >Send to server</button>
 
           <div className="p-2 text-4xl">Mint your NFT!</div>
 
+
+
+
+
           <div className="p-2 text-2xl">
-            Give your Bless ipfs here:
+            Give your Bless here:
           </div>
 
           {currentAccount === "" ? (
