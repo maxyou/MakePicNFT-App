@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import myBlessNft from '../utils/MyBlessNFT.json';
 import { ethers } from "ethers";
 import * as IPFS from 'ipfs-core'
@@ -24,18 +24,22 @@ declare global {
   // }
 }
 
-const CONTRACT_ADDRESS = "0x8E542a41088cfDBFdCF21B796413d7d8f363f65E";
+const CONTRACT_ADDRESS = "0x031F40F141437fa00077F6cE289f046B3a5eaf1c";
 
 
 const Home: NextPage = () => {
+  const ref = useRef();
 
   const [currentAccount, setCurrentAccount] = useState("");
-  const [myBless, setMyBless] = useState("");
+  const [inputImgPath, setInputImgPath] = useState("file path");
+  const [nftName, setNftName] = useState("");
+  const [nftDescription, setNftDescription] = useState("");
   const [isMintting, setIsMintting] = useState(false);
   const [justMintNft, setJustMintNft] = useState("");
   const [image, setImage] = useState(null);
   const [createObjectURL, setCreateObjectURL] = useState<any>(null);
-  const [ipfsCid, setIpfsCid] = useState("");
+  const [imgIpfsCid, setImgIpfsCid] = useState("");
+  const [metaIpfsCid, setMetaIpfsCid] = useState("");
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -119,7 +123,7 @@ const Home: NextPage = () => {
           //alert(`New NFT: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
           //alert(`https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`)
           const viewAddr = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
-          console.log("EventListener - view address" + viewAddr);          
+          console.log("EventListener - view address: " + viewAddr);
           // const viewAddr = `https://goerli.pixxiti.com/address/0xCa57e178c9414FDF541beaf6097D85D9716A5359`
           setJustMintNft(viewAddr)
         });
@@ -134,43 +138,43 @@ const Home: NextPage = () => {
     }
   }
 
-  const uploadFile = (event:any) => {
+  const uploadFile = (event: any) => {
     if (event.target.files && event.target.files[0]) {
       const i = event.target.files[0];
 
       setImage(i);
-      const imgUrl = URL.createObjectURL(i)
-      console.log("selected a image, object url:"+imgUrl)
-      setCreateObjectURL(imgUrl);
+      const imgObjectUrl = URL.createObjectURL(i)
+      console.log("selected a image, object url:" + imgObjectUrl)
+      setCreateObjectURL(imgObjectUrl);
+      
     }
   };
 
-  const sendToIpfs = async () => {
-
-    if(image!=null){
-      const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
-      const { cid } = await ipfs.add(image)
-      setIpfsCid("ipfs://"+cid)
-      console.log("ipfs create and add string, cid:"+cid)
-    }
-
-  }
+  const removeImg = () => {
+    (document.getElementById("theinput") as HTMLInputElement).value = "";
+    setImage(null);
+    setCreateObjectURL('');
+  };
 
   const askContractToMintNft = async () => {
 
+    if (!(nftName && nftDescription && image)) { return }
 
-    // const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
-    // const { cid } = await ipfs.add(myBless)
-    // console.log("ipfs create and add string, cid:"+cid)
+    const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
 
-    // if(true){
-    //   return;
-    // }
+    const cidImg = await (await ipfs.add(image!)).cid
+    setImgIpfsCid("ipfs://" + cidImg)
+    console.log("img cid:" + cidImg)
 
-    // if (!myBless || myBless.length == 0) {
-    //   alert("please input you brand")
-    //   return;
-    // }
+    const meta = `{
+      "name":"${nftName}",
+      "description":"${nftDescription}",
+      "image":"${imgIpfsCid}"
+    }
+    `
+    const cidMeta = await (await ipfs.add(meta)).cid
+    setMetaIpfsCid("ipfs://" + cidMeta)
+    console.log("meta cid:" + cidMeta)
 
     try {
       const { ethereum } = window;
@@ -181,14 +185,13 @@ const Home: NextPage = () => {
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myBlessNft.abi, signer);
 
         setIsMintting(true)
-
         console.log("Going to pop wallet now to pay gas...")
-        let nftTxn = await connectedContract.makeBlessNFT(ipfsCid);
+        let nftTxn = await connectedContract.makeBlessNFT("ipfs://" + cidMeta);
 
         console.log("Mining...please wait.")
         await nftTxn.wait();
 
-        setMyBless("")
+        setNftName("")
         setIsMintting(false)
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
 
@@ -226,33 +229,58 @@ const Home: NextPage = () => {
       <div className='bg-gray-100 w-screen h-screen flex flex-col justify-center items-center gap-2'>
 
         <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
-        
-        <input type="file" name="myImage" onChange={uploadFile} />
-        <img src={createObjectURL} />
-        <button
-          className="btn btn-primary"
-          type="submit"
-          onClick={sendToIpfs}
-        >Send to server</button>
 
           <div className="p-2 text-4xl">Mint your NFT!</div>
 
-
-
-
-
-          <div className="p-2 text-2xl">
-            Give your Bless here:
-          </div>
 
           {currentAccount === "" ? (
             renderNotConnectedContainer()
           ) : (
             <div className="p-2 flex flex-col justify-center items-center gap-5">
-              <div>
-                <input className="shadow appearance-none border rounded min-w-[25rem] p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-600"
-                  type="text" name="text" onChange={e => setMyBless(e.target.value)} value={myBless} placeholder="ipfs://..." />
+
+              <div className='w-full p-2'>
+
+                <div className="text-md">
+                  name:
+                </div>
+
+                <div>
+                  <input className="shadow appearance-none border rounded w-full min-w-[25rem] p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-600"
+                    type="text" name="text" onChange={e => setNftName(e.target.value)} value={nftName} />
+                </div>
               </div>
+
+              <div className='w-full p-2'>
+
+                <div className="text-md">
+                  description:
+                </div>
+
+                <div>
+                  <input className="shadow appearance-none border rounded w-full min-w-[25rem] p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-600"
+                    type="text" name="text" onChange={e => setNftName(e.target.value)} value={nftName} />
+                </div>
+              </div>
+
+
+              <div className='w-full p-2'>
+
+                <div className="text-md">
+                  image:
+                </div>
+                <div className='flex justify-between items-center'>                
+            
+                <input type="file" name="myImage" onChange={uploadFile} id='theinput' />
+                {
+                  image?<button onClick={removeImg} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">remove</button>:null
+                }
+                  
+                </div>
+                <div>
+                  <img src={createObjectURL} className='pt-2'/>
+                </div>
+              </div>
+
               {
                 isMintting ?
                   (<button className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Please wait Mintting... </button>) :
@@ -260,12 +288,12 @@ const Home: NextPage = () => {
               }
               {
                 justMintNft.length == 0 ? null :
-                <div className='w-full h-auto p-2 border rounded'>
-                  <div>
-                  Click to view last NFT you mint:
+                  <div className='w-full h-auto p-2 border rounded'>
+                    <div>
+                      Click to view last NFT you mint:
+                    </div>
+                    <a className='break-all underline decoration-transparent hover:decoration-inherit' href={justMintNft}> {justMintNft} </a>
                   </div>
-                  <a className='break-all underline decoration-transparent hover:decoration-inherit' href={justMintNft}> {justMintNft} </a>
-                </div>
               }
             </div>
           )}
