@@ -192,6 +192,7 @@ const Home: NextPage = () => {
         await nftTxn.wait();
 
         setNftName("")
+        setNftDescription("")
         setIsMintting(false)
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
 
@@ -230,7 +231,7 @@ const Home: NextPage = () => {
 
         <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
 
-          <div className="p-2 text-4xl">Mint your NFT!</div>
+          <div className="p-2 text-4xl">Mint Your NFT!</div>
 
 
           {currentAccount === "" ? (
@@ -258,7 +259,7 @@ const Home: NextPage = () => {
 
                 <div>
                   <input className="shadow appearance-none border rounded w-full min-w-[25rem] p-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-600"
-                    type="text" name="text" onChange={e => setNftName(e.target.value)} value={nftName} />
+                    type="text" name="text" onChange={e => setNftDescription(e.target.value)} value={nftDescription} />
                 </div>
               </div>
 
@@ -281,10 +282,18 @@ const Home: NextPage = () => {
                 </div>
               </div>
 
-              {
+              {                
+
                 isMintting ?
                   (<button className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Please wait Mintting... </button>) :
-                  (<button onClick={askContractToMintNft} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Mint NFT</button>)
+                  (
+                    nftName && nftDescription && image
+                    ?                    
+                    <button onClick={askContractToMintNft} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Mint NFT</button>
+                    :
+                    <button className="bg-blue-500 text-white p-2 rounded opacity-50 cursor-not-allowed">Mint NFT</button>
+                    
+                  )
               }
               {
                 justMintNft.length == 0 ? null :
