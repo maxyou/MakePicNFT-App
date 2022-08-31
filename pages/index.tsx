@@ -31,15 +31,15 @@ const Home: NextPage = () => {
   const ref = useRef();
 
   const [currentAccount, setCurrentAccount] = useState("");
-  const [inputImgPath, setInputImgPath] = useState("file path");
+  // const [inputImgPath, setInputImgPath] = useState("file path");
   const [nftName, setNftName] = useState("");
   const [nftDescription, setNftDescription] = useState("");
   const [isMintting, setIsMintting] = useState(false);
   const [justMintNft, setJustMintNft] = useState("");
   const [image, setImage] = useState(null);
   const [createObjectURL, setCreateObjectURL] = useState<any>(null);
-  const [imgIpfsCid, setImgIpfsCid] = useState("");
-  const [metaIpfsCid, setMetaIpfsCid] = useState("");
+  // const [imgIpfsCid, setImgIpfsCid] = useState("");
+  // const [metaIpfsCid, setMetaIpfsCid] = useState("");
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -162,19 +162,21 @@ const Home: NextPage = () => {
 
     const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
 
-    const cidImg = await (await ipfs.add(image!)).cid
-    setImgIpfsCid("ipfs://" + cidImg)
-    console.log("img cid:" + cidImg)
+    const cidImg = (await ipfs.add(image!)).cid
+
+    const ipfsCidImg = "ipfs://" + cidImg
+    
+    console.log("ipfs cid img:" + ipfsCidImg)
 
     const meta = `{
       "name":"${nftName}",
       "description":"${nftDescription}",
-      "image":"${imgIpfsCid}"
+      "image":"${ipfsCidImg}"
     }
     `
-    const cidMeta = await (await ipfs.add(meta)).cid
-    setMetaIpfsCid("ipfs://" + cidMeta)
-    console.log("meta cid:" + cidMeta)
+    const cidMeta = (await ipfs.add(meta)).cid
+    const ipfsCidMeta = "ipfs://" + cidMeta
+    console.log("ipfs cid meta:" + ipfsCidMeta)
 
     try {
       const { ethereum } = window;
@@ -186,7 +188,7 @@ const Home: NextPage = () => {
 
         setIsMintting(true)
         console.log("Going to pop wallet now to pay gas...")
-        let nftTxn = await connectedContract.makeBlessNFT("ipfs://" + cidMeta);
+        let nftTxn = await connectedContract.makeBlessNFT(ipfsCidMeta);
 
         console.log("Mining...please wait.")
         await nftTxn.wait();
