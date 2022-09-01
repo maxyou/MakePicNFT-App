@@ -1,0 +1,3 @@
+module.exports = {
+  CONTRACT_ADDRESS: "0x5F8A98Ac4fc447c74a345694016763CF0A13ed9B",
+}

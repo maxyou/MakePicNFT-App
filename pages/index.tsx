@@ -1,8 +1,8 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
 import React, { useEffect, useState, useRef } from "react";
-import myBlessNft from '../utils/MyBlessNFT.json';
+import makePicNft from '../contract/MakePicNFT.json';
+import { CONTRACT_ADDRESS } from '../contract/contract.config';
 import { ethers } from "ethers";
 import * as IPFS from 'ipfs-core'
 import { MetaMaskInpageProvider } from "@metamask/providers";
@@ -12,34 +12,20 @@ declare global {
   interface Window {
     ethereum: MetaMaskInpageProvider;
   }
-
-  // type ExternalProvider = {
-  //   isMetaMask?: boolean;
-  //   isStatus?: boolean;
-  //   host?: string;
-  //   path?: string;
-  //   sendAsync?: (request: { method: string, params?: Array<any> }, callback: (error: any, response: any) => void) => void
-  //   send?: (request: { method: string, params?: Array<any> }, callback: (error: any, response: any) => void) => void
-  //   request?: (request: { method: string, params?: Array<any> }) => Promise<any>
-  // }
 }
-
-const CONTRACT_ADDRESS = "0x031F40F141437fa00077F6cE289f046B3a5eaf1c";
 
 
 const Home: NextPage = () => {
   const ref = useRef();
 
   const [currentAccount, setCurrentAccount] = useState("");
-  // const [inputImgPath, setInputImgPath] = useState("file path");
   const [nftName, setNftName] = useState("");
   const [nftDescription, setNftDescription] = useState("");
   const [isMintting, setIsMintting] = useState(false);
-  const [justMintNft, setJustMintNft] = useState("");
-  const [image, setImage] = useState(null);
+  const [viewAddrOpenSea, setViewAddrOpenSea] = useState('');
+  const [viewAddrRarible, setViewAddrRarible] = useState('');
+  const [nftImage, setNftImage] = useState(null);
   const [createObjectURL, setCreateObjectURL] = useState<any>(null);
-  // const [imgIpfsCid, setImgIpfsCid] = useState("");
-  // const [metaIpfsCid, setMetaIpfsCid] = useState("");
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -112,20 +98,24 @@ const Home: NextPage = () => {
         // const provider = new ethers.providers.Web3Provider(ethereum as unknown as ExternalProvider);
         const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myBlessNft.abi, signer);
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, makePicNft.abi, signer);
 
         // THIS IS THE MAGIC SAUCE.
         // This will essentially "capture" our event when our contract throws it.
         // If you're familiar with webhooks, it's very similar to that!        
-        connectedContract.on("NFTMintInfo", (from, tokenId, bless) => {
-          console.log(from, tokenId.toNumber(), bless)
+        connectedContract.on("NFTMintInfo", (from, tokenId, jsonUri) => {
+          console.log(from, tokenId.toNumber(), jsonUri)
           //console.log("EventListener will send alert here.");          
-          //alert(`New NFT: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
-          //alert(`https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`)
-          const viewAddr = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
-          console.log("EventListener - view address: " + viewAddr);
-          // const viewAddr = `https://goerli.pixxiti.com/address/0xCa57e178c9414FDF541beaf6097D85D9716A5359`
-          setJustMintNft(viewAddr)
+
+          const rarible = `https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`
+          setViewAddrRarible(rarible)
+          console.log("EventListener - rarible view address: " + rarible);
+
+          const opensea = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
+          setViewAddrOpenSea(opensea)
+          console.log("EventListener - opensea view address: " + opensea);
+
+          // const viewAddr = `https://goerli.pixxiti.com/address/xxxxxxxxxxx`
         });
 
         console.log("Setup event listener!")
@@ -139,33 +129,34 @@ const Home: NextPage = () => {
   }
 
   const uploadFile = (event: any) => {
+
     if (event.target.files && event.target.files[0]) {
       const i = event.target.files[0];
 
-      setImage(i);
+      setNftImage(i);
       const imgObjectUrl = URL.createObjectURL(i)
       console.log("selected a image, object url:" + imgObjectUrl)
       setCreateObjectURL(imgObjectUrl);
-      
+
     }
   };
 
   const removeImg = () => {
-    (document.getElementById("theinput") as HTMLInputElement).value = "";
-    setImage(null);
+
+    (document.getElementById("inputNftImg") as HTMLInputElement).value = "";
+    setNftImage(null);
     setCreateObjectURL('');
+
   };
 
   const askContractToMintNft = async () => {
 
-    if (!(nftName && nftDescription && image)) { return }
+    if (!(nftName && nftDescription && nftImage)) { return }
 
     const ipfs = await IPFS.create({ repo: "ok" + Math.random() })
-
-    const cidImg = (await ipfs.add(image!)).cid
-
+    const cidImg = (await ipfs.add(nftImage!)).cid
     const ipfsCidImg = "ipfs://" + cidImg
-    
+
     console.log("ipfs cid img:" + ipfsCidImg)
 
     const meta = `{
@@ -184,17 +175,18 @@ const Home: NextPage = () => {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myBlessNft.abi, signer);
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, makePicNft.abi, signer);
 
         setIsMintting(true)
         console.log("Going to pop wallet now to pay gas...")
-        let nftTxn = await connectedContract.makeBlessNFT(ipfsCidMeta);
+        let nftTxn = await connectedContract.makePicNFT(ipfsCidMeta);
 
         console.log("Mining...please wait.")
         await nftTxn.wait();
 
         setNftName("")
         setNftDescription("")
+        removeImg()
         setIsMintting(false)
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
 
@@ -225,7 +217,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>mint your best wish</title>
+        <title>mint your pic nft</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -233,7 +225,7 @@ const Home: NextPage = () => {
 
         <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
 
-          <div className="p-2 text-4xl">Mint Your NFT!</div>
+          <div className="p-2 text-4xl">Mint Pic NFT!</div>
 
 
           {currentAccount === "" ? (
@@ -271,41 +263,61 @@ const Home: NextPage = () => {
                 <div className="text-md">
                   image:
                 </div>
-                <div className='flex justify-between items-center'>                
-            
-                <input type="file" name="myImage" onChange={uploadFile} id='theinput' />
-                {
-                  image?<button onClick={removeImg} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">remove</button>:null
-                }
-                  
+
+                <div className='flex justify-between items-center'>
+                  <input type="file" name="myImage" onChange={uploadFile} id='inputNftImg' />
+                  {
+                    nftImage ? <button onClick={removeImg} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">remove</button> : null
+                  }
                 </div>
+
                 <div>
-                  <img src={createObjectURL} className='pt-2'/>
+                  {
+                    nftImage ? <img src={createObjectURL} className='pt-2' /> : null
+                  }
                 </div>
               </div>
 
-              {                
-
-                isMintting ?
-                  (<button className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Please wait Mintting... </button>) :
-                  (
-                    nftName && nftDescription && image
-                    ?                    
-                    <button onClick={askContractToMintNft} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Mint NFT</button>
-                    :
-                    <button className="bg-blue-500 text-white p-2 rounded opacity-50 cursor-not-allowed">Mint NFT</button>
-                    
-                  )
-              }
               {
-                justMintNft.length == 0 ? null :
-                  <div className='w-full h-auto p-2 border rounded'>
-                    <div>
-                      Click to view last NFT you mint:
-                    </div>
-                    <a className='break-all underline decoration-transparent hover:decoration-inherit' href={justMintNft}> {justMintNft} </a>
-                  </div>
+
+                nftName && nftDescription && nftImage
+                  ?
+                  (
+                    isMintting ?
+                      <button className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded opacity-50 cursor-not-allowed">Please wait Mintting... </button> :
+                      <button onClick={askContractToMintNft} className="bg-blue-500 min-w-fit hover:bg-blue-700 text-white p-2 rounded">Mint NFT</button>
+                  )
+                  :
+                  <button className="bg-blue-500 text-white p-2 rounded opacity-50 cursor-not-allowed">Mint NFT</button>
               }
+
+              <div className='w-full h-auto p-2'>
+
+                {
+                  viewAddrOpenSea && viewAddrRarible
+                    ?
+                    <div>
+                      Click to view NFT:
+                    </div>
+                    :
+                    null
+                }
+
+                {
+                  viewAddrOpenSea
+                    ?
+                    <a className='block break-all underline decoration-transparent hover:decoration-inherit' href={viewAddrOpenSea}> {viewAddrOpenSea} </a>
+                    :
+                    null
+                }
+                {
+                  viewAddrRarible
+                    ?
+                    <a className='block break-all underline decoration-transparent hover:decoration-inherit' href={viewAddrRarible}> {viewAddrRarible} </a>
+                    :
+                    null
+                }
+              </div>
             </div>
           )}
 
