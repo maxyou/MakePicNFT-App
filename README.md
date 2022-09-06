@@ -21,5 +21,5 @@ This project has been deployed online:
 The picture and JSON are not pinned in ipfs. I'm not sure if OpenSea cache this files, and what will happen in the future.
 
 ### Screenshot
-![](https://raw.githubusercontent.com/maxyou/HideText/main/screen.png)
-![](https://raw.githubusercontent.com/maxyou/HideText/main/screen.png)
+![](https://github.com/maxyou/MakePicNFT-App/blob/main/make-pic-nft-screenshot.png)
+![](https://github.com/maxyou/MakePicNFT-App/blob/main/make-pic-nft-screenshot-2.png)
