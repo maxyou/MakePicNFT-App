@@ -1,27 +1,25 @@
-# Next.js + Tailwind CSS Example
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.0)](https://tailwindcss.com/blog/tailwindcss-v3) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+# Make Picture NFT
 
-## Deploy your own
+MakePicNFT inherit from ERC721URIStorage. Mint function get URI params of JSON which include the link to a picture.
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
+This project has been deployed online: 
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+- https://make-pic-nft-app.vercel.app/
 
-## How to use
+### How it works
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
+1. Run js-ipfs node in your browser.
+2. Write picture into ipfs by js-ipfs node.
+3. Construct a JSON according to OpenSea format, with picture ipfs address.
+4. Write this JSON into ipfs by js-ipfs node.
+5. Call contract function to mint a NFT, with the JSON address as params.
 
-```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
-```
 
-```bash
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
-```
+### Defect
 
-```bash
-pnpm create next-app --example with-tailwindcss with-tailwindcss-app
-```
+The picture and JSON are not pinned in ipfs. I'm not sure if OpenSea cache this files, and what will happen in the future.
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+### Screenshot
+![](https://raw.githubusercontent.com/maxyou/HideText/main/screen.png)
+![](https://raw.githubusercontent.com/maxyou/HideText/main/screen.png)
