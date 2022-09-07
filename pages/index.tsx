@@ -311,11 +311,13 @@ const Home: NextPage = () => {
                     null
                 }
                 {
+                  /* 
                   viewAddrRarible
                     ?
                     <a className='block break-all underline decoration-transparent hover:decoration-inherit' href={viewAddrRarible}> {viewAddrRarible} </a>
                     :
-                    null
+                    null 
+                    */
                 }
               </div>
             </div>
