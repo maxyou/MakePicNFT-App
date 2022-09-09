@@ -1,11 +1,13 @@
 
 # Make Picture NFT
 
-MakePicNFT inherit from ERC721URIStorage. Mint function get URI params of JSON which include the link to a picture.
+Contract MakePicNFT inherit from ERC721URIStorage, which has a URI to store additional information. This project provide a web page to input information and upload a picture, and then call to mint.
 
-This project has been deployed online: 
+Deployed: 
 
 - https://make-pic-nft-app.vercel.app/
+
+The contract MakePicNFT: https://github.com/maxyou/MakePicNFT-Contract
 
 ### How it works
 
@@ -14,7 +16,6 @@ This project has been deployed online:
 3. Construct a JSON according to OpenSea format, with picture ipfs address.
 4. Write this JSON into ipfs by js-ipfs node.
 5. Call contract function to mint a NFT, with the JSON address as params.
-
 
 ### Defect
 
