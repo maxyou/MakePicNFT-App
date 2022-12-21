@@ -107,7 +107,7 @@ const Home: NextPage = () => {
           console.log(from, tokenId.toNumber(), jsonUri)
           //console.log("EventListener will send alert here.");          
 
-          const rarible = `https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`
+          const rarible = `https://goerli.rarible.com/token/${CONTRACT_ADDRESS}:${tokenId.toNumber()}?tab=history`
           setViewAddrRarible(rarible)
           console.log("EventListener - rarible view address: " + rarible);
 
@@ -188,7 +188,7 @@ const Home: NextPage = () => {
         setNftDescription("")
         removeImg()
         setIsMintting(false)
-        console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+        console.log(`Mined, see transaction: https://goerli.etherscan.io/tx/${nftTxn.hash}`);
 
       } else {
         console.log("Ethereum object doesn't exist!");
@@ -225,7 +225,7 @@ const Home: NextPage = () => {
 
         <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
 
-          <div className="p-2 text-4xl">Mint Pic NFT!</div>
+          <div className="p-2 text-4xl">Mint Pic NFT in Goerli!</div>
 
 
           {currentAccount === "" ? (
