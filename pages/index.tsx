@@ -7,6 +7,8 @@ import { ethers } from "ethers";
 import * as IPFS from 'ipfs-core'
 import { MetaMaskInpageProvider } from "@metamask/providers";
 
+const NET_VERSION_GOERLI = '5';
+
 declare global {
 
   interface Window {
@@ -22,6 +24,7 @@ const Home: NextPage = () => {
   const [nftName, setNftName] = useState("");
   const [nftDescription, setNftDescription] = useState("");
   const [isMintting, setIsMintting] = useState(false);
+  const [isRightNet, setIsRightNet] = useState(true);
   const [viewAddrOpenSea, setViewAddrOpenSea] = useState('');
   const [viewAddrRarible, setViewAddrRarible] = useState('');
   const [nftImage, setNftImage] = useState(null);
@@ -150,6 +153,20 @@ const Home: NextPage = () => {
   };
 
   const askContractToMintNft = async () => {
+    
+    const { ethereum } = window;
+
+    const net_version = await ethereum.request({ method: 'net_version' });
+    console.log(`window.ethereum.net_version ${net_version}`);
+
+    if (net_version != NET_VERSION_GOERLI) {
+      setIsRightNet(false)
+      console.log(`set isRightNet to false`);
+      return
+    }else{
+      setIsRightNet(true)
+      console.log(`set isRightNet to true`);
+    }
 
     if (!(nftName && nftDescription && nftImage)) { return }
 
@@ -170,7 +187,7 @@ const Home: NextPage = () => {
     console.log("ipfs cid meta:" + ipfsCidMeta)
 
     try {
-      const { ethereum } = window;
+      
 
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum as unknown as ethers.providers.ExternalProvider);
@@ -225,7 +242,7 @@ const Home: NextPage = () => {
 
         <div className='bg-white w-1/2 max-w-2xl 	min-w-[30rem] h-auto p-6 border rounded flex flex-col justify-center items-center gap-5'>
 
-          <div className="p-2 text-4xl">Mint Pic NFT in Goerli!</div>
+          <div className="p-2 text-4xl">Mint Pic NFT on Goerli!</div>
 
 
           {currentAccount === "" ? (
@@ -289,6 +306,11 @@ const Home: NextPage = () => {
                   )
                   :
                   <button className="bg-blue-500 text-white p-2 rounded opacity-50 cursor-not-allowed">Mint NFT</button>
+                  
+              }
+              {                
+                  !isRightNet?
+                  <div className="text-md">Please switch Metamask to Goerli testnet.</div>:null
               }
 
               <div className='w-full h-auto p-2'>
